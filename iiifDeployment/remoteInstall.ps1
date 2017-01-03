@@ -1,14 +1,16 @@
 #Set-Item WSMan:\localhost\Client\TrustedHosts -Value 192.168.12.211 -Force -Concatenate
 #Get-Item WSMan:\localhost\Client\TrustedHosts
 
+Param(
+ $localInstallFolder = "D:\Install"
+)
+
+
 $remoteServer = "192.168.12.211"
 $cred = Get-Credential
 
-#Kopiera dontcopy-fil
-Copy-Item -Path 'D:\Install\dontcopy\dont_copy_IIIF.txt' -Destination D:\Install\IIIFserver\dont_copy.txt -Force
-
-$source = "D:\Install\IIIFserver"
-$destination = "D:\Install\ZipPaket\iiif.zip"
+$source = "$localInstallDrive\IIIFserver"
+$destination = "$localInstallDrive\ZipPaket\iiif.zip"
 If(Test-path $destination) {Remove-item $destination}
 Add-Type -assembly "system.io.compression.filesystem"
 [io.compression.zipfile]::CreateFromDirectory($source, $destination)
