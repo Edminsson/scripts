@@ -1,7 +1,7 @@
 Param(
-  $passwordFilePath = ".\cred.txt",
   $remoteServer = "23.97.136.79",
-  $userName = "llaaxag"
+  $userName = "llaaxag",
+  $passwordFilePath = ".\cred.txt"
 )
 
 #Get-Item WSMan:\localhost\Client\TrustedHosts
