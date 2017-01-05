@@ -1,7 +1,7 @@
 #Parameterdeklaration
 # om skriptet anropas med -copyConfig så blir variabeln true annars false
 Param(
- [switch] $copyConfig
+  [switch] $copyConfig
 )
 
 #Stoppa exekvering vid fel. Funkar dock inte alltid vid anrop av externa paket/program.
@@ -30,22 +30,24 @@ Move-Item 7zlog.txt $BackupDir -Force
 Move-Item *.7z $BackupDir
 
 if (Test-Path $InstallDir){
-  Write-Host "Delete application $ApplicationName"
   if ($copyConfig) {
+    Write-Host "Delete application $ApplicationName including web.config"
     Get-ChildItem -Path $InstallDir -Recurse | Remove-Item -Force -Recurse
   }
   else {
-    Get-ChildItem -Path $InstallDir -Recurse -exclude "web.config" | Remove-Item -Force -Recurse
+    Write-Host "Delete application $ApplicationName but exclude web.config"
+    Get-ChildItem -Path $InstallDir -Recurse -Exclude "web.config" | Remove-Item -Force -Recurse
   }
 
-  Write-Host "Copy new application $ApplicationName"
   if ($copyConfig) {
+    Write-Host "Copy new application $ApplicationName including web.config"
     Get-ChildItem -Path $ApplicationName |
     Copy-Item -Destination $InstallDir -Recurse -Container
   }
   else {
-    Get-ChildItem -Path $ApplicationName |
-    Copy-Item -Destination $InstallDir -Recurse -Container -Exclude "web.config"
+    Write-Host "Copy new application $ApplicationName, but exclude web.config"
+    Get-ChildItem -Path $ApplicationName -Exclude "web.config" |
+    Copy-Item -Destination $InstallDir -Recurse -Container
 
     if (Test-Path "$ApplicationName\Views") {
       Copy-Item "$ApplicationName\Views\Web.config" "$InstallDir\Views"
@@ -54,6 +56,7 @@ if (Test-Path $InstallDir){
       Write-Host "$InstallDir\Views saknas" -BackgroundColor Red
     }
   }
+
   Write-Host Comparing IIIF folders
   $iiifSource = Get-ChildItem -Recurse -path $ApplicationName | foreach {Get-FileHash –Path $_.FullName}
   $iiifDest = Get-ChildItem -Recurse -path $InstallDir | foreach {Get-FileHash –Path $_.FullName}
@@ -62,6 +65,7 @@ if (Test-Path $InstallDir){
     Write-Host Käll- och dest-mappar för webbappen är identiska -BackgroundColor Yellow -ForegroundColor Black
   }
   else {
+    Write-Host Följande skillnader hittades vid en jämförelse mellan käll- och dest-mappar -BackgroundColor Yellow -ForegroundColor Black
     Write-Host $folderDiff.Path -BackgroundColor Yellow -ForegroundColor Black
   }
 

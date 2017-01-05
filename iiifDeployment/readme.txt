@@ -8,3 +8,8 @@ There are two powershell scripts
     - copies the compressed file to the server
     - extracts the compressed file
     - runs the localInstall script.
+
+remoteInstall needs
+- a folder with the new web app ($source)
+- the destination server must have a folder called Install in drive E:
+
