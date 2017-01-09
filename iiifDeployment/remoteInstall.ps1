@@ -6,7 +6,6 @@ Param(
   $localInstallFolder = "D:\Install",
   $remoteServer = "192.168.12.73",
   $remoteInstallPath = "C:\Install\",
-  $localInstallScript = "localInstall.ps1",
   $applicationName = "IIIFServer",
   $zipFileName = "iiif.zip",
   $passwordFilePath = ".\cred.txt"
@@ -31,7 +30,7 @@ Write-Host "Current user name is $userName"
 Write-Host "Local install path is $localInstallFolder"
 Write-Host "Remote server is $remoteServer"
 
-# Läs lösenord från fil och skapa credentials
+#Create credentials
 $password = get-content $passwordFilePath | convertto-securestring
 $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $userName,$password
 
@@ -62,6 +61,8 @@ Invoke-Command -ComputerName $remoteServer -Credential $cred -ScriptBlock {
 } -ArgumentList $remoteInstallPath
 
 Invoke-Command -ComputerName $remoteServer -Credential $cred -ScriptBlock {
-  param ($installScript)
-  C:\Install\IIIFserver\Latest\localInstall.ps1
-} -ArgumentList $localInstallScript
+  param ($installPath, $appName)
+  cd $installPath\$appName\latest
+  ./localInstall.ps1
+} -ArgumentList $remoteInstallPath, $applicationName
+
