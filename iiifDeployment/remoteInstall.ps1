@@ -2,26 +2,28 @@
 #Get-Item WSMan:\localhost\Client\TrustedHosts
 
 Param(
-  $userName = "llaaxag",
+  $userName = "Administrat�r",
   $localInstallFolder = "D:\Install",
-  $remoteServer = "23.97.136.79",
-  $remoteInstallDrive = "C$",
-  $remoteInstallPath = "E:\Install\",
+  $remoteServer = "192.168.12.73",
+  $remoteInstallPath = "C:\Install\",
   $localInstallScript = "localInstall.ps1",
   $applicationName = "IIIFServer",
   $zipFileName = "iiif.zip",
   $passwordFilePath = ".\cred.txt"
 )
 
-#skapa path som används när PSDrive skapas
+#Initialize variable that contains remote path for PSDrive
 $splt = $remoteInstallPath.Split("{\}");
 $rmtPath = "\\${remoteServer}"
 foreach ($part in $splt) {
     $part = $part.Replace(":", "$");
 	$rmtPath = $rmtPath + "\" + $part
 }
+if ($rmtPath.EndsWith("\")) { 
+    $rmtPath = $rmtPath.Substring(0,$rmtPath.Length -1)
+}
 Write-Host $rmtPath
- 
+
 #Stoppa exekvering vid fel. Funkar dock inte alltid vid anrop av externa paket/program.
 $ErrorActionPreference = "Stop"
 
@@ -61,5 +63,5 @@ Invoke-Command -ComputerName $remoteServer -Credential $cred -ScriptBlock {
 
 Invoke-Command -ComputerName $remoteServer -Credential $cred -ScriptBlock {
   param ($installScript)
-  E:\Install\IIIFserver\Latest\"Install IIIFServer.bat"
+  C:\Install\IIIFserver\Latest\localInstall.ps1
 } -ArgumentList $localInstallScript

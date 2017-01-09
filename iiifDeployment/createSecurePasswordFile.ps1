@@ -1,5 +1,5 @@
 Param(
-  $passwordFilePath = "C:\tmp\cred.txt"
+  $passwordFilePath = ".\cred.txt"
 )
 
 read-host -assecurestring | convertfrom-securestring | out-file $passwordFilePath
