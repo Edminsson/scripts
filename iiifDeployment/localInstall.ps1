@@ -1,7 +1,10 @@
-#Parameterdeklaration
-# om skriptet anropas med -copyConfig så blir variabeln true annars false
+#Use:
+# localInstall.ps1 [-copyConfig]
+# The copyConfig argument is optional. Use it to overwrite the current web.config
 Param(
-  [switch] $copyConfig
+  [switch] $copyConfig,
+  $installFolder = "C:\Inetpub",
+  $backupFolder = "C:\Backup"
 )
 
 #Stoppa exekvering vid fel. Funkar dock inte alltid vid anrop av externa paket/program.
@@ -9,8 +12,8 @@ $ErrorActionPreference = "Stop"
 
 #Variabeldeklarationer
 $ApplicationName = "IIIFServer"
-$InstallDir = "C:\Inetpub2\$ApplicationName"
-$BackupDir = "C:\Backup\$ApplicationName"
+$InstallDir = "$installFolder\$ApplicationName"
+$BackupDir = "$backupFolder\$ApplicationName"
 
 if(-not (Test-Path $BackupDir)) { Write-Host "$BackupDir saknas" -BackgroundColor Red; return}
 
@@ -58,16 +61,18 @@ if (Test-Path $InstallDir){
   }
 
   Write-Host Comparing IIIF folders
-  $iiifSource = Get-ChildItem -Recurse -path $ApplicationName | foreach {Get-FileHash –Path $_.FullName}
-  $iiifDest = Get-ChildItem -Recurse -path $InstallDir | foreach {Get-FileHash –Path $_.FullName}
+  $iiifSource = Get-ChildItem -Recurse -path $ApplicationName | foreach {Get-FileHash -Path $_.FullName}
+  $iiifDest = Get-ChildItem -Recurse -path $InstallDir | foreach {Get-FileHash -Path $_.FullName}
   $folderDiff = @((Compare-Object -ReferenceObject $iiifSource -DifferenceObject $iiifDest -Property hash -PassThru))
   if ($folderDiff.Length -eq 0) {
-    Write-Host Käll- och dest-mappar för webbappen är identiska -BackgroundColor Yellow -ForegroundColor Black
+    Write-Host "Source and dest folders are identical" -BackgroundColor Yellow -ForegroundColor Black
   }
   else {
-    Write-Host Följande skillnader hittades vid en jämförelse mellan käll- och dest-mappar -BackgroundColor Yellow -ForegroundColor Black
+    Write-Host "There are differences between source and dest folders" -BackgroundColor Yellow -ForegroundColor Black
     Write-Host $folderDiff.Path -BackgroundColor Yellow -ForegroundColor Black
   }
 
 }
-else { Write-Host "$InstallDir saknas" -BackgroundColor Red }
+else { 
+  Write-Host "$InstallDir saknas" -BackgroundColor Red 
+}

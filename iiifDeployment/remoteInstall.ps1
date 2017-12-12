@@ -2,26 +2,27 @@
 #Get-Item WSMan:\localhost\Client\TrustedHosts
 
 Param(
-  $userName = "llaaxag",
+  $userName = "Administrat�r",
   $localInstallFolder = "D:\Install",
-  $remoteServer = "23.97.136.79",
-  $remoteInstallDrive = "C$",
-  $remoteInstallPath = "E:\Install\",
-  $localInstallScript = "localInstall.ps1",
+  $remoteServer = "192.168.12.73",
+  $remoteInstallPath = "C:\Install\",
   $applicationName = "IIIFServer",
   $zipFileName = "iiif.zip",
   $passwordFilePath = ".\cred.txt"
 )
 
-#skapa path som används när PSDrive skapas
+#Initialize variable that contains remote path for PSDrive
 $splt = $remoteInstallPath.Split("{\}");
 $rmtPath = "\\${remoteServer}"
 foreach ($part in $splt) {
     $part = $part.Replace(":", "$");
 	$rmtPath = $rmtPath + "\" + $part
 }
+if ($rmtPath.EndsWith("\")) { 
+    $rmtPath = $rmtPath.Substring(0,$rmtPath.Length -1)
+}
 Write-Host $rmtPath
- 
+
 #Stoppa exekvering vid fel. Funkar dock inte alltid vid anrop av externa paket/program.
 $ErrorActionPreference = "Stop"
 
@@ -29,7 +30,7 @@ Write-Host "Current user name is $userName"
 Write-Host "Local install path is $localInstallFolder"
 Write-Host "Remote server is $remoteServer"
 
-# Läs lösenord från fil och skapa credentials
+#Create credentials
 $password = get-content $passwordFilePath | convertto-securestring
 $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $userName,$password
 
@@ -60,6 +61,8 @@ Invoke-Command -ComputerName $remoteServer -Credential $cred -ScriptBlock {
 } -ArgumentList $remoteInstallPath
 
 Invoke-Command -ComputerName $remoteServer -Credential $cred -ScriptBlock {
-  param ($installScript)
-  E:\Install\IIIFserver\Latest\"Install IIIFServer.bat"
-} -ArgumentList $localInstallScript
+  param ($installPath, $appName)
+  cd $installPath\$appName\latest
+  ./localInstall.ps1
+} -ArgumentList $remoteInstallPath, $applicationName
+
